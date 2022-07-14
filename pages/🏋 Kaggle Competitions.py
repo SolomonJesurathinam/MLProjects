@@ -48,9 +48,9 @@ def titanic():
         model_accuracy = st.checkbox("Determine Model Accuracy", disabled=(not data_processed))
         try:
             if model_accuracy:
-                forest_accuracy, xgb_accuracy, decision_accuracy  = test.model_accuracy()
+                forest_accuracy, decision_accuracy  = test.model_accuracy()
                 st.write("Random Forest accuracy score: ", forest_accuracy)
-                st.write("XGB Boost accuracy score: ", xgb_accuracy)
+                #st.write("XGB Boost accuracy score: ", xgb_accuracy)
                 st.write("Decision Tree Classifier accuracy score: ", decision_accuracy)
         except:
             st.error("Select Training Data after Processing and uncheck from Bottom")

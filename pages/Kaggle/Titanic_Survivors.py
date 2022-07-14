@@ -117,15 +117,15 @@ class Titanic:
         forest_accuracy = accuracy_score(y_test, forest_model.predict(x_test))
 
         #xgb_model = XGBClassifier(learning_rate=0.1, max_depth=5, colsample_bytree=0.8, seed=27)
-        xgb_model = XGBClassifier(tree_method = "hist")
-        xgb_model.fit(x_train, y_train)
-        xgb_accuracy = accuracy_score(y_test, xgb_model.predict(x_test))
+        #xgb_model = XGBClassifier(tree_method = "hist")
+        #xgb_model.fit(x_train, y_train)
+        #xgb_accuracy = accuracy_score(y_test, xgb_model.predict(x_test))
         #xgb_accuracy = 100
 
         decision_model = DecisionTreeClassifier()
         decision_model.fit(x_train, y_train)
         decision_accuracy = accuracy_score(y_test, decision_model.predict(x_test))
-        return forest_accuracy, xgb_accuracy, decision_accuracy
+        return forest_accuracy, decision_accuracy
 
     def realtime_data(self):
         y_predict = forest_model.predict(test_csv)
