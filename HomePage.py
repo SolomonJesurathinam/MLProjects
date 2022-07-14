@@ -10,11 +10,11 @@ def lottieapi(url: str):
     return r.json()
 
 #setting Page parameters
-st.set_page_config(initial_sidebar_state="auto",page_title="Purple Projects",page_icon="📈",layout='wide')
+st.set_page_config(initial_sidebar_state="auto",page_title="Solomon's Bio",page_icon="📈",layout='wide')
 #st.markdown("<h1 style='text-align: center; color: white;'>Purple Projects</h1>", unsafe_allow_html=True)
 
 #Title and image
-st.title("Purple Projects ")
+st.title("WIP ")
 st.image("data/Photo.png", width=150)
 
 #About Me

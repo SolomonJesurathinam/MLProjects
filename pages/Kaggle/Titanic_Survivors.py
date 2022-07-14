@@ -1,157 +1,135 @@
-import numpy as np
 import pandas as pd
 import os
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import GaussianNB
 
 class Titanic:
 
         #load the data
     def load_data(self):
-        global data_csv,test_csv
+        global data_csv,test_csv,excel_path1
         ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..'))
         excel_path = os.path.join(ROOT_DIR, 'data', "Titanic_train.csv")
         excel_path1 = os.path.join(ROOT_DIR, 'data', "Titanic_test.csv")
         data_csv = pd.read_csv(excel_path)
         test_csv = pd.read_csv(excel_path1)
-        print(data_csv.head())
-        print(data_csv.shape)
-        return data_csv
+        return data_csv,test_csv
 
     def data_processing(self):
-        global data_csv,test_csv,X,Y
-        # Finding the missing value in the dataset
-        print(data_csv.isnull().sum())
-        print(test_csv.isnull().sum())
-
-        # Drop the missing value from dataset (Cabin)
+        global data_csv,test_csv
+        # dropping Cabin
         data_csv = data_csv.drop("Cabin", axis=1)
         test_csv = test_csv.drop("Cabin", axis=1)
 
-        # Replace missing values in Age with mean
+        # fill nan with mean for Age and mode for Ticket
         data_csv["Age"].fillna(data_csv["Age"].mean(), inplace=True)
         test_csv["Age"].fillna(test_csv["Age"].mean(), inplace=True)
+        test_csv["Fare"].fillna(0, inplace=True)
 
-        # Replace Embarked values with mode
-        print(data_csv["Embarked"].mode())
+        # fill na for categorical value
         data_csv["Embarked"].fillna(data_csv["Embarked"].mode()[0], inplace=True)
-        print(test_csv["Embarked"].mode())
         test_csv["Embarked"].fillna(test_csv["Embarked"].mode()[0], inplace=True)
 
-        # Replacing missing Fare value with mean for test data
-        test_csv["Fare"].fillna(test_csv["Fare"].mean(), inplace=True)
+        # split Family Name and drop Name
+        data_csv["FamilyName"] = data_csv["Name"].str.split(",", expand=True)[0]
+        data_csv = data_csv.drop("Name", axis=1)
 
-        # checking for missing values again after replacing
-        print(data_csv.isnull().sum())
-        print(test_csv.isnull().sum())
+        test_csv["FamilyName"] = test_csv["Name"].str.split(",", expand=True)[0]
+        test_csv = test_csv.drop("Name", axis=1)
 
-        # count the surviours
-        print(data_csv["Survived"].value_counts())
+        # Custom function
+        def custom_split(str):
+            if str[0].isnumeric():
+                return str
+            else:
+                a = 0
+                i = len(str)
+                while (i > 1):
+                    if str[i - 1] == " ":
+                        a = len(str) - i + 1
+                        break
+                    i = i - 1
+                str1 = str[:-a:-1]
+                return str1[::-1]
 
-        # Encode the label for Sex and Embark
-        from sklearn.preprocessing import LabelEncoder
+        # Splitting Ticket to get the numeric values
+        i = 0
+        while (i < len(data_csv["Ticket"])):
+            data_csv.loc[i, "Ticket"] = custom_split(data_csv["Ticket"][i])
+            i = i + 1
+        data_csv["Ticket"] = data_csv["Ticket"].replace("INE", "0")
 
-        label = LabelEncoder()
-        data_csv['Sex'] = label.fit_transform(data_csv['Sex'])  # 1 male, 0 female
-        test_csv['Sex'] = label.fit_transform(test_csv['Sex'])
-        print(data_csv['Sex'])
-        data_csv['Embarked'] = label.fit_transform(data_csv['Embarked'])  # c-1, Q-2, S-3
-        test_csv['Embarked'] = label.fit_transform(test_csv['Embarked'])
-        print(data_csv['Embarked'])
+        # convert to numeric type
+        data_csv["Ticket"] = pd.to_numeric(data_csv["Ticket"])
 
-        print(data_csv.dtypes)
+        j = 0
+        while (j < len(test_csv["Ticket"])):
+            test_csv.loc[j, "Ticket"] = custom_split(test_csv["Ticket"][j])
+            j = j + 1
 
-        # drop unused columns
-        data_csv = data_csv.drop(["Name", "Ticket"], axis=1)
-        test_csv = test_csv.drop(["Name", "Ticket"], axis=1)
+        # convert to numeric type
+        data_csv["Ticket"] = pd.to_numeric(data_csv["Ticket"])
+        test_csv["Ticket"] = pd.to_numeric(test_csv["Ticket"])
 
-        # seperate Features and Target
-        X = data_csv.drop("Survived", axis=1)
-        Y = data_csv['Survived']
-        return X
+        #data_csv.info()
 
+        # check correleation
+        #print(data_csv.corr())
+
+        # split numeric and categoricl data
+        numeric_data = [column for column in data_csv.select_dtypes(["int", "float"])]
+        categoric_data = [column for column in data_csv.select_dtypes(exclude=["int", "float"])]
+
+        categoric_data1 = [column for column in test_csv.select_dtypes(exclude=["int", "float"])]
+
+        # Encoding categoric data
+        from sklearn.preprocessing import OrdinalEncoder
+        label = OrdinalEncoder()
+        data_csv[categoric_data] = label.fit_transform(data_csv[categoric_data])
+        test_csv[categoric_data1] = label.fit_transform(test_csv[categoric_data1])
+
+        # Scaling the data
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler()
+        numeric_data.remove("Survived")
+        data_csv[numeric_data] = scaler.fit_transform(data_csv[numeric_data])
+        test_csv[numeric_data] = scaler.fit_transform(test_csv[numeric_data])
+
+        # check correleation
+        #print(data_csv.corr())
+        return data_csv
 
     def model_accuracy(self):
-        # Seperate Train and test set 80% training and 20% testing
+        # split X and Y
+        global forest_model
+        X = data_csv.drop("Survived", axis=1)
+        Y = data_csv["Survived"]
+
         from sklearn.model_selection import train_test_split
-        x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+        x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
 
-        # Scale the data
-        from sklearn.preprocessing import StandardScaler
-        scaler = StandardScaler().fit(x_train)
-        x_train = scaler.transform(x_train)
-        x_test = scaler.transform(x_test)
+        # Check accuracy of 3 models
+        from sklearn.ensemble import RandomForestClassifier
+        from sklearn.metrics import accuracy_score
+        from xgboost import XGBClassifier
+        from sklearn.tree import DecisionTreeClassifier
 
+        forest_model = RandomForestClassifier()
+        forest_model.fit(x_train, y_train)
+        forest_accuracy = accuracy_score(y_test, forest_model.predict(x_test))
 
-        # Creating function with many machine models
+        xgb_model = XGBClassifier(learning_rate=0.1, max_depth=5, colsample_bytree=0.8, seed=27)
+        xgb_model.fit(x_train, y_train)
+        xgb_accuracy = accuracy_score(y_test, xgb_model.predict(x_test))
 
-        # Use Logistic Regression
-        log = LogisticRegression()
-        log.fit(x_train, y_train)
-
-        # Use DecisionTreeClassifier
-        tree = DecisionTreeClassifier(criterion='log_loss', random_state=100, splitter='random')
-        tree.fit(x_train, y_train)
-
-        # Use RandomForestClassifier
-        forest = RandomForestClassifier(n_estimators=10, criterion='gini')
-        forest.fit(x_train, y_train)
-
-        # Use Gaussian NB
-        gauss = GaussianNB()
-        gauss.fit(x_train, y_train)
-
-        # print model score and accuracy score
-        from sklearn import metrics
-
-        accuracy = metrics.accuracy_score(y_test, log.predict(x_test))
-        print("Logistic Regression accuracy score: ", accuracy)
-        accuracy = metrics.accuracy_score(y_test, tree.predict(x_test))
-        print("Decision tree accuracy score: ", accuracy)
-        accuracy = metrics.accuracy_score(y_test, forest.predict(x_test))
-        print("Random Forest accuracy score: ", accuracy)
-        accuracy = metrics.accuracy_score(y_test, gauss.predict(x_test))
-        print("Gaussian NB accuracy score: ", accuracy)
-
-
-        # Kfolds accuracy score (considering Decision, Random and Gaussian)
-        from sklearn.model_selection import cross_val_score
-
-        score_DR = cross_val_score(DecisionTreeClassifier(), X, Y, cv=10)
-        print("\nDecision Tree Average score: ", np.average(score_DR))
-
-        score_DR = cross_val_score(RandomForestClassifier(), X, Y, cv=10)
-        print("Random Forest Average score: ", np.average(score_DR))
-
-        score_DR = cross_val_score(GaussianNB(), X, Y, cv=10)
-        print("Gaussian NB Average score: ", np.average(score_DR))
-
-        # Selecting Random Forest model and tuning it
-        score1 = cross_val_score(RandomForestClassifier(n_estimators=10), X, Y, cv=10)
-        score2 = cross_val_score(RandomForestClassifier(n_estimators=20), X, Y, cv=10)
-        score3 = cross_val_score(RandomForestClassifier(n_estimators=30), X, Y, cv=10)
-        score4 = cross_val_score(RandomForestClassifier(n_estimators=40), X, Y, cv=10)
-        print("\nRandom Forest Average score with 10 Estimators: ", np.average(score1))
-        print("Random Forest Average score with 20 Estimators: ", np.average(score2))
-        print("Random Forest Average score with 30 Estimators: ", np.average(score3))
-        print("Random Forest Average score with 40 Estimators: ", np.average(score4))
-        return score1,score2,score3,score4
+        decision_model = DecisionTreeClassifier()
+        decision_model.fit(x_train, y_train)
+        decision_accuracy = accuracy_score(y_test, decision_model.predict(x_test))
+        return forest_accuracy, xgb_accuracy, decision_accuracy
 
     def realtime_data(self):
-        # Selecting correct parameters and fit the model
-        prod_model = RandomForestClassifier(n_estimators=30)
-        prod_model.fit(X, Y)
-
-        # Predicting the survivors
-        y_predict = prod_model.predict(test_csv)
-        print(y_predict)
-
-        # output df
-        output_df = pd.DataFrame({'PassengerId': test_csv['PassengerId'], 'Survived': y_predict})
-        print(output_df.head())
-        return output_df
+        y_predict = forest_model.predict(test_csv)
+        test_csv1 = pd.read_csv(excel_path1)
+        outputDF = pd.DataFrame({'PassengerId': test_csv1['PassengerId'], 'Survived': y_predict})
+        return outputDF
 
 test = Titanic()
 test.load_data()
