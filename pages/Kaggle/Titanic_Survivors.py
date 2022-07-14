@@ -116,7 +116,8 @@ class Titanic:
         forest_model.fit(x_train, y_train)
         forest_accuracy = accuracy_score(y_test, forest_model.predict(x_test))
 
-        xgb_model = XGBClassifier(learning_rate=0.1, max_depth=5, colsample_bytree=0.8, seed=27)
+        #xgb_model = XGBClassifier(learning_rate=0.1, max_depth=5, colsample_bytree=0.8, seed=27)
+        xgb_model = XGBClassifier()
         xgb_model.fit(x_train, y_train)
         xgb_accuracy = accuracy_score(y_test, xgb_model.predict(x_test))
 
