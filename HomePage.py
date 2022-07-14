@@ -35,7 +35,7 @@ with contact_link:
 
 #Github
 githubGif = lottieapi("https://assets3.lottiefiles.com/packages/lf20_S6vWEd.json")
-github_icon, github_link = st.columns((0.05,1))
+github_icon, github_link = st.columns((0.04,1))
 with github_icon:
     st_lottie(githubGif,key="github")
 with github_link:
@@ -43,7 +43,7 @@ with github_link:
 
 #Linkedin
 LinkedinGif = lottieapi("https://assets10.lottiefiles.com/packages/lf20_v7gucnur.json")
-linkedin_icon, linkedin_link = st.columns((0.05,1))
+linkedin_icon, linkedin_link = st.columns((0.04,1))
 with linkedin_icon:
     st_lottie(LinkedinGif ,key="linkedin")
 with linkedin_link:
@@ -51,7 +51,7 @@ with linkedin_link:
 
 #Email
 EmailGif = lottieapi("https://assets7.lottiefiles.com/packages/lf20_u25cckyh.json")
-Email_icon, Email_link = st.columns((0.05,1))
+Email_icon, Email_link = st.columns((0.04,1))
 with Email_icon:
     st_lottie(EmailGif ,key="email")
 with Email_link:
