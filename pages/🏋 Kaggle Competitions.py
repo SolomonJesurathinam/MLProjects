@@ -1,8 +1,10 @@
 import random
 
 from pages.Kaggle import Titanic_Survivors as ts
+from pages.Kaggle import SpaceTitanic as spt
 import os
 import streamlit as st
+import pandas as pd
 
 def title():
     st.set_page_config(page_title="Kaggle Competitions", layout='centered', initial_sidebar_state='auto',
@@ -67,6 +69,41 @@ def titanic():
         if outputDF:
             st.write(output)
 
+def space_Titanic():
+    if options == "Space":
+        @st.cache
+        def cacheFunc(a):
+            test1 = spt.Space_Titanic()
+            raw_training_data, raw_testing_data, processed_data, accuracyScore, output = test1.spaceTitanic()
+            return raw_training_data, raw_testing_data, processed_data, accuracyScore, output
+
+        # model reset
+        cacheValue = 1
+        cache = st.button("Reset Cache", help="Reset's the model cached value and build again - Time Consuming")
+        if cache:
+            cacheValue = cacheValue + random.randint(0, 9)
+        raw_training_data, raw_testing_data, processed_data, accuracyScore, output = cacheFunc(cacheValue)
+        load_data = st.checkbox("Training Data")
+        if load_data:
+            st.write(pd.DataFrame(raw_training_data))
+        processedData = st.checkbox("Processed Training Data")
+        if processedData:
+            st.write(processed_data)
+        modelAccuracy = st.checkbox("Model Accuracy")
+        if modelAccuracy:
+            st.write("XGB accuracy score: ",accuracyScore[0])
+            st.write("Random Forest accuracy score: ",accuracyScore[1])
+            st.write("Decision Tree accuracy score: ",accuracyScore[2])
+        realData = st.checkbox("Real time data")
+        if realData:
+            st.write(raw_testing_data)
+        outputDF = st.checkbox("Predicted output")
+        if outputDF:
+            st.write(output)
+
+
+
 title()
 dropdown()
 titanic()
+space_Titanic()
