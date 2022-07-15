@@ -33,8 +33,6 @@ class Space_Titanic:
         data_csv = data_csv.drop(["Name", "Cabin"], axis=1)
         test_data = test_data.drop(["Name", "Cabin"], axis=1)
 
-        data_csv.info()
-
         # Change data type of Cabin Number
         data_csv["CabinNum"] = pd.to_numeric(data_csv["CabinNum"])
         test_data["CabinNum"] = pd.to_numeric(test_data["CabinNum"])
