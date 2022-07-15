@@ -116,16 +116,15 @@ class Titanic:
         forest_model.fit(x_train, y_train)
         forest_accuracy = accuracy_score(y_test, forest_model.predict(x_test))
 
-        #xgb_model = XGBClassifier(learning_rate=0.1, max_depth=5, colsample_bytree=0.8, seed=27)
-        #xgb_model = XGBClassifier(tree_method = "hist")
-        #xgb_model.fit(x_train, y_train)
-        #xgb_accuracy = accuracy_score(y_test, xgb_model.predict(x_test))
-        #xgb_accuracy = 100
+        xgb_model = XGBClassifier(learning_rate=0.1, max_depth=5, colsample_bytree=0.8, seed=27)
+        xgb_model.fit(x_train, y_train)
+        xgb_accuracy = accuracy_score(y_test, xgb_model.predict(x_test))
 
         decision_model = DecisionTreeClassifier()
         decision_model.fit(x_train, y_train)
         decision_accuracy = accuracy_score(y_test, decision_model.predict(x_test))
-        return forest_accuracy, decision_accuracy
+        print(forest_accuracy,decision_accuracy)
+        return forest_accuracy, decision_accuracy,xgb_accuracy
 
     def realtime_data(self):
         y_predict = forest_model.predict(test_csv)
@@ -133,11 +132,11 @@ class Titanic:
         outputDF = pd.DataFrame({'PassengerId': test_csv1['PassengerId'], 'Survived': y_predict})
         return outputDF
 
-test = Titanic()
-test.load_data()
-test.data_processing()
-test.model_accuracy()
-test.realtime_data()
+#test = Titanic()
+#test.load_data()
+#test.data_processing()
+#test.model_accuracy()
+#test.realtime_data()
 
 
 # export

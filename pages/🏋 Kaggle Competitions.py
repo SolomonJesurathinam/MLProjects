@@ -1,3 +1,5 @@
+import random
+
 from pages.Kaggle import Titanic_Survivors as ts
 import os
 import streamlit as st
@@ -17,59 +19,54 @@ def dropdown():
 #Titanic code
 def titanic():
     if options == "Titanic":
+        #sidebar functions
         st.sidebar.info("Using machine learning to create a model that predicts which passengers survived the Titanic shipwreck.")
         with st.sidebar.expander("Coding Links",expanded=False):
             st.write("[Link](https://www.kaggle.com/code/solomonyolo/titanic-wip) to Kaggle Notebook code")
             st.write("[Link](https://github.com/SolomonJesurathinam/JuypterProjects/tree/master/Kaggle%20Competitions/Titanic) to full code from Github ")
-
+        #image function
         ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
         image_path = os.path.join(ROOT_DIR, 'data', "KaggleTitanic.png")
-
         with st.sidebar.expander("Kaggle Public score",expanded=False):
             from PIL import Image
             kaggleImage = Image.open(image_path)
             st.image(kaggleImage)
-        test = ts.Titanic()  # object for Titanic class
-        # Raw Training Data
-        train_data = st.checkbox("Data For Training")
-        trainData,testData = test.load_data()
-        if train_data:
-            st.dataframe(trainData)
+        #Caching the model values
+        @st.cache
+        def cacheFunc(a):
+            test = ts.Titanic()  # object for Titanic class
+            train_data, test_data = test.load_data()
+            processed_data = test.data_processing()
+            forest_accuracy, decision_accuracy,xgb_accuracy = test.model_accuracy()
+            output = test.realtime_data()
+            return train_data,test_data,processed_data,forest_accuracy, decision_accuracy,xgb_accuracy,output
 
-        #Training Data after Processing
-        data_processed = st.checkbox("PreProcessed Data - Data Cleaning and PreProcessing", disabled=(not train_data))
-        try:
-            if data_processed:
-                st.dataframe(test.data_processing())
-        except:
-            st.error("Select Raw training data and uncheck from Bottom")
+        #model reset
+        cacheValue=1
+        cache = st.button("Reset Cache",help="Reset's the model cached value and build again - Time Consuming")
+        if cache:
+            cacheValue = cacheValue + random.randint(0, 9)
 
-        #Model Accuracy
-        model_accuracy = st.checkbox("Determine Model Accuracy", disabled=(not data_processed))
-        try:
-            if model_accuracy:
-                forest_accuracy, decision_accuracy  = test.model_accuracy()
-                st.write("Random Forest accuracy score: ", forest_accuracy)
-                #st.write("XGB Boost accuracy score: ", xgb_accuracy)
-                st.write("Decision Tree Classifier accuracy score: ", decision_accuracy)
-        except:
-            st.error("Select Training Data after Processing and uncheck from Bottom")
-
-        #Test Data
-        testing_data = st.checkbox("Real time testing data",disabled=(not model_accuracy))
-        if testing_data:
-                st.write(testData)
-
-        #Real time data
-        output = st.checkbox("Testing the model with Real time data", disabled=(not testing_data))
-        try:
-            if output:
-                st.dataframe(test.realtime_data())
-        except:
-            st.error("Select all checkboxes and uncheck from bottom")
+        #Model UI elements
+        train_data,test_data,processed_data,forest_accuracy,decision_accuracy,xgb_accuracy,output = cacheFunc(cacheValue)
+        load_data = st.checkbox("Training Data")
+        if load_data:
+            st.write(train_data)
+        processedData = st.checkbox("Processed Training Data")
+        if processedData:
+            st.write(processed_data)
+        modelAccuracy = st.checkbox("Model Accuracy")
+        if modelAccuracy:
+            st.write("Forest accuracy score is: ",forest_accuracy)
+            st.write("Decision Tree accuracy score is: ",decision_accuracy)
+            st.write("XGBoost accuracy score is: ",xgb_accuracy)
+        realData = st.checkbox("Real time data")
+        if realData:
+            st.write(test_data)
+        outputDF=st.checkbox("Predicted output")
+        if outputDF:
+            st.write(output)
 
 title()
 dropdown()
 titanic()
-
-
