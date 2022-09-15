@@ -56,16 +56,30 @@ st.write(df)
 
 if st.button("League Match Prediction"):
     Output = league_model.predict(df)[0]
+    probability = league_model.predict_proba(df)
     if Output == 1:
-        st.success(Team1+ " Won the match")
+        percentage = probability[0][1]
+        percentage = round(percentage * 100)
+        st.success(Team1 + " has {}% chance to win the match".format(percentage))
+        st.warning("{}% chance for the match to be tied".format(round((probability[0][2])*100)))
     elif Output == 2:
-        st.success("Match Drawn")
+        percentage = probability[0][2]
+        percentage = round(percentage * 100)
+        st.success( "{}% chance for Match to be Tied".format(percentage))
     elif Output == 0:
-        st.success(Team2 + " Won the match")
+        percentage = probability[0][0]
+        percentage = round(percentage * 100)
+        st.success(Team2 + " has {}% chance to win the match".format(percentage))
+        st.warning("{}% chance for the match to be tied".format(round((probability[0][2]) * 100)))
 
 if st.button("KnockOut Match Prediction"):
     Output = knockout_model.predict(df)[0]
+    probability = knockout_model.predict_proba(df)
     if Output == 1:
-        st.success(Team1+ " Won the match")
+        percentage = probability[0][1]
+        percentage = round(percentage*100)
+        st.success(Team1+ " has {}% chance to win the match".format(percentage))
     elif Output == 0:
-        st.success(Team2 + " Won the match")
+        percentage = probability[0][0]
+        percentage = round(percentage * 100)
+        st.success(Team2 + " has {}% chance to win the match".format(percentage))
