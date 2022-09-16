@@ -3,14 +3,59 @@ import numpy as np
 import joblib
 import streamlit as st
 import os
+import base64
 
 #read excel
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 excel_path = os.path.join(ROOT_DIR,'data',"FifaRankings.csv")
 rankings = pd.read_csv(excel_path)
 
-st.set_page_config(initial_sidebar_state="auto",page_title="FIFA 22 WORLD CUP PREDICTIONS",page_icon="🌱")
-st.header("FIFA 22 WORLD CUP PREDICTIONS")
+st.set_page_config(initial_sidebar_state="auto",page_title="FIFA WORLD CUP 22 PREDICTIONS",page_icon="⚽")
+
+#Background Image
+def set_bg_hack(main_bg):
+    main_bg_ext = "png"
+    st.markdown(
+         f"""
+         <style>
+         .stApp {{
+             background: url(data:image/{main_bg_ext};base64,{base64.b64encode(open(main_bg, "rb").read()).decode()});
+             background-size: cover
+         }}
+         </style>
+         """,
+         unsafe_allow_html=True
+     )
+
+main_bg = os.path.join(ROOT_DIR,'data',"Upload.png")
+set_bg_hack(main_bg)
+
+def sidebar_bg(side_bg):
+   side_bg_ext = 'png'
+   st.markdown(
+      f"""
+      <style>
+      [data-testid="stSidebar"] > div:first-child {{
+          background: url(data:image/{side_bg_ext};base64,{base64.b64encode(open(side_bg, "rb").read()).decode()});
+      }}
+      </style>
+      """,
+      unsafe_allow_html=True,
+      )
+side_bg = os.path.join(ROOT_DIR,'data',"sidebar.png")
+sidebar_bg(side_bg)
+
+
+
+st.header("FIFA 22 WORLD CUP PREDICTIONS ⚽")
+
+with st.sidebar.expander("! Information",expanded=True):
+    st.write("This is a ML model to predict the upcoming FIFA WORLD CUP 2022.")
+
+with st.sidebar.expander("Project Links:",expanded=True):
+    st.write("[Github](https://github.com/SolomonJesurathinam/FIFA-World-Cup-22-Predictions)")
+
+
 
 list_2022 = np.array(['Qatar', 'Germany', 'Denmark', 'Brazil', 'France', 'Belgium', 'Croatia', 'Spain', 'Serbia', 'England', 'Switzerland', 'Netherlands', 'Argentina', 'IR Iran', 'Korea Republic', 'Japan', 'Saudi Arabia', 'Ecuador', 'Uruguay', 'Canada', 'Ghana', 'Senegal', 'Portugal', 'Poland', 'Tunisia', 'Morocco', 'Cameroon', 'USA', 'Mexico', 'Wales', 'Australia', 'Costa Rica'])
 Team1 = st.selectbox(label="Team1",options=list_2022)
