@@ -42,7 +42,7 @@ def sidebar_bg(side_bg):
       """,
       unsafe_allow_html=True,
       )
-side_bg = os.path.join(ROOT_DIR,'data',"sidebar.png")
+side_bg = os.path.join(ROOT_DIR,'data',"SideBar.png")
 sidebar_bg(side_bg)
 
 
