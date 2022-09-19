@@ -206,5 +206,5 @@ if st.button("Simulate FIFA WORLD CUP 2022"):
     st.header("Finals")
     final = knockout_model_result(final1,final2)
     table((final1 + " VS " + final2), [final])
-    st.success(final+" Will win the World Cup 2022")
+    st.success(final+" will win the World Cup 2022")
 
