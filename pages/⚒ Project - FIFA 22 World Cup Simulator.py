@@ -43,6 +43,8 @@ sidebar_bg(side_bg)
 
 st.header("FIFA 22 WORLD CUP SIMULATOR ⚽")
 
+with st.sidebar.expander("Project Links:",expanded=True):
+    st.write("[Github](https://github.com/SolomonJesurathinam/MLProjects/blob/master/pages/%E2%9A%92%20Project%20-%20FIFA%2022%20World%20Cup%20Simulator.py)")
 
 sim_count = st.slider("Simulation Count",min_value=10,max_value=100,help="Number of times each match is simultated to get the result")
 random_value = st.slider("Randomness Value",min_value=2,max_value=10,help="Affects team performance value (positive & negative)")
