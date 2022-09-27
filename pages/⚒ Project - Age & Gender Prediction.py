@@ -1,4 +1,4 @@
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+from streamlit_webrtc import VideoTransformerBase, webrtc_streamer,WebRtcMode
 import cv2
 import os
 from tensorflow import keras
@@ -34,8 +34,6 @@ def age_image(predict_img):
     return predictions
 
 
-
-
 class VideoTransformer(VideoTransformerBase):
     def transform(self, frame):
         image = frame.to_ndarray(format="bgr24")
@@ -59,6 +57,6 @@ class VideoTransformer(VideoTransformerBase):
 
         return image
 
-webrtc_streamer(key="example", video_transformer_factory=VideoTransformer,rtc_configuration={  # Add this line
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-    })
+webrtc_streamer(key="example", video_processor_factory=VideoTransformer,rtc_configuration={  # Add this line
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+                media_stream_constraints={"video": True, "audio": False})
