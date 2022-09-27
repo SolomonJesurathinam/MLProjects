@@ -1,9 +1,10 @@
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer,WebRtcMode
+from streamlit_webrtc import webrtc_streamer,WebRtcMode,VideoProcessorBase
 import cv2
 import os
 from tensorflow import keras
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
+import time
 
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 age = os.path.join(ROOT_DIR,'data/models',"AgePrediction.h5")
@@ -33,10 +34,9 @@ def age_image(predict_img):
     predictions = age_model.predict(op)
     return predictions
 
-
-class VideoTransformer(VideoTransformerBase):
-    def transform(self, frame):
-        image = frame.to_ndarray(format="bgr24")
+import av
+class OpenCVVideoProcessor(VideoProcessorBase):
+    def annotate(self,image):
         face_cascade = cv2.CascadeClassifier(classifier)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.1, 5)
@@ -51,12 +51,14 @@ class VideoTransformer(VideoTransformerBase):
 
             # Age Prediction
             age = age_image(gray_face_img)
-            #min_value = round(age[0][0]) - 3
-            #max_value = round(age[0][0]) + 3
+            # min_value = round(age[0][0]) - 3
+            # max_value = round(age[0][0]) + 3
             cv2.putText(image, str(round(age[0][0])), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-
         return image
 
-webrtc_streamer(key="example", video_processor_factory=VideoTransformer,rtc_configuration={  # Add this line
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
-                media_stream_constraints={"video": True, "audio": False})
+    def recv(self, frame: av.VideoFrame)-> av.VideoFrame:
+        image = frame.to_ndarray(format="bgr24")
+        annotate_image = self.annotate(image)
+        return av.VideoFrame.from_ndarray(annotate_image, format="bgr24")
+
+webrtc_streamer(key="GenderAge",mode=WebRtcMode.SENDRECV, video_processor_factory=OpenCVVideoProcessor,async_processing=True,rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},media_stream_constraints={"video": True, "audio": False})
