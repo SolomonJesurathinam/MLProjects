@@ -14,15 +14,7 @@ classifier = os.path.join(ROOT_DIR,'data',"haarcascade_frontalface_alt.xml")
 import streamlit as st
 st.title("Age Gender Prediction")
 
-@st.cache(allow_output_mutation=True)
-def load_models():
-    return keras.models.load_model(gender)
-@st.cache(allow_output_mutation=True)
-def age_models():
-    return keras.models.load_model(age)
-
-gender_model = load_models()
-age_model = age_models()
+gender_model = keras.models.load_model(gender)
 
 def predict_image(predict_img):
     x = cv2.resize(predict_img, (48, 48))
@@ -34,7 +26,7 @@ def predict_image(predict_img):
     if pred_value == 1:
         return "Female"
 
-
+age_model = keras.models.load_model(age)
 def age_image(predict_img):
     x = cv2.resize(predict_img, (48, 48))
     x = x.reshape(-1,48,48,1)
