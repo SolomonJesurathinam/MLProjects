@@ -13,8 +13,8 @@ classifier = os.path.join(ROOT_DIR,'data',"haarcascade_frontalface_alt.xml")
 import streamlit as st
 st.title("Age Gender Prediction")
 
-gender_model = keras.models.load_model(gender)
-age_model = keras.models.load_model(age)
+gender_model = keras.models.load_model(gender,compile=False)
+age_model = keras.models.load_model(age,compile=False)
 
 def predict_image(predict_img):
     x = cv2.resize(predict_img, (48, 48))
@@ -53,11 +53,20 @@ def predict(image):
         cv2.putText(image, str(round(age[0][0])), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
     return image
 
-input_image = st.camera_input("Take a Picture to predict")
+def radio_functiom(input_image):
+    if input_image is not None:
+        bytes_data = input_image.getvalue()
+        cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+        cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
+        output = predict(cv2_img)
+        st.image(output)
 
-if input_image is not None:
-    bytes_data = input_image.getvalue()
-    cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
-    cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
-    output = predict(cv2_img)
-    st.image(output)
+radio_values = st.radio(label="Prediction",options= ("Upload a picture","Photo from Camera"))
+if radio_values == "Upload a picture":
+    input_image = st.file_uploader("Upload a pic",type=['png', 'jpg'])
+    radio_functiom(input_image)
+
+if radio_values == "Photo from Camera":
+    input_image = st.camera_input("Take a Picture to predict")
+    radio_functiom(input_image)
+
